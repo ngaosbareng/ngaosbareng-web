@@ -80,22 +80,36 @@
         </div>
 
     @elseif($viewMode === 'chapters')
-        <!-- Chapters List -->
+        <!-- Chapters List with Hierarchy -->
         <div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $book->title }}</h3>
             <p class="text-gray-600 mb-6">{{ $book->description }}</p>
             
-            @if(isset($chapters) && $chapters->count() > 0)
+            @php
+                $hierarchicalChapters = $this->getAllChaptersHierarchical();
+            @endphp
+            
+            @if(count($hierarchicalChapters) > 0)
                 <div class="space-y-3">
-                    @foreach($chapters as $chapter)
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    @foreach($hierarchicalChapters as $chapter)
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" 
+                             style="margin-left: {{ $chapter->level * 20 }}px;"
                              wire:click="selectChapter({{ $chapter->id }})">
                             <div class="flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-lg font-medium text-gray-900">{{ $chapter->title }}</h4>
-                                    @if($chapter->description)
-                                        <p class="text-gray-600 text-sm mt-1">{{ $chapter->description }}</p>
+                                <div class="flex items-center">
+                                    @if($chapter->level == 0)
+                                        <span class="text-lg mr-2">📖</span>
+                                    @elseif($chapter->level == 1)
+                                        <span class="text-lg mr-2">📄</span>
+                                    @else
+                                        <span class="text-lg mr-2">📝</span>
                                     @endif
+                                    <div>
+                                        <h4 class="text-lg font-medium text-gray-900">{{ $chapter->title }}</h4>
+                                        @if($chapter->description)
+                                            <p class="text-gray-600 text-sm mt-1">{{ $chapter->description }}</p>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="text-sm text-gray-500">
                                     {{ $chapter->discussions->count() }} pembahasan
@@ -103,10 +117,6 @@
                             </div>
                         </div>
                     @endforeach
-                </div>
-                
-                <div class="mt-6">
-                    {{ $chapters->links() }}
                 </div>
             @else
                 <div class="text-center py-8">

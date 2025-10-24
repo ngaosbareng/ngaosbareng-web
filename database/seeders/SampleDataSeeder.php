@@ -27,7 +27,7 @@ class SampleDataSeeder extends Seeder
             'description' => 'Kitab yang membahas tentang dasar-dasar kepercayaan dalam Islam, meliputi rukun iman dan hal-hal yang berkaitan dengan akidah.'
         ]);
 
-        // Create chapters for book 1
+        // Create chapters for book 1 with deeper hierarchy
         $chapter1 = Chapter::create([
             'book_id' => $book1->id,
             'title' => 'Bab Jual Beli',
@@ -43,19 +43,66 @@ class SampleDataSeeder extends Seeder
             'order' => 1
         ]);
 
+        $chapter2_1 = Chapter::create([
+            'book_id' => $book1->id,
+            'parent_id' => $chapter2->id,
+            'title' => 'Rukun Jual Beli',
+            'description' => 'Penjelasan detail tentang rukun-rukun jual beli',
+            'order' => 1
+        ]);
+
+        $chapter2_2 = Chapter::create([
+            'book_id' => $book1->id,
+            'parent_id' => $chapter2->id,
+            'title' => 'Syarat Jual Beli',
+            'description' => 'Penjelasan detail tentang syarat-syarat jual beli',
+            'order' => 2
+        ]);
+
         $chapter3 = Chapter::create([
+            'book_id' => $book1->id,
+            'parent_id' => $chapter1->id,
+            'title' => 'Jual Beli yang Terlarang',
+            'description' => 'Sub bab tentang berbagai bentuk jual beli yang dilarang',
+            'order' => 2
+        ]);
+
+        $chapter4 = Chapter::create([
             'book_id' => $book1->id,
             'title' => 'Bab Sewa Menyewa',
             'description' => 'Pembahasan tentang hukum sewa menyewa (ijarah)',
             'order' => 2
         ]);
 
-        // Create chapters for book 2
-        $chapter4 = Chapter::create([
+        $chapter5 = Chapter::create([
+            'book_id' => $book1->id,
+            'parent_id' => $chapter4->id,
+            'title' => 'Rukun dan Syarat Ijarah',
+            'description' => 'Sub bab tentang rukun dan syarat sewa menyewa',
+            'order' => 1
+        ]);
+
+        // Create chapters for book 2 with hierarchy
+        $chapter6 = Chapter::create([
             'book_id' => $book2->id,
             'title' => 'Bab Iman kepada Allah',
             'description' => 'Pembahasan tentang keimanan kepada Allah SWT',
             'order' => 1
+        ]);
+
+        $chapter7 = Chapter::create([
+            'book_id' => $book2->id,
+            'parent_id' => $chapter6->id,
+            'title' => 'Asmaul Husna',
+            'description' => 'Sub bab tentang nama-nama Allah yang indah',
+            'order' => 1
+        ]);
+
+        $chapter8 = Chapter::create([
+            'book_id' => $book2->id,
+            'title' => 'Bab Iman kepada Malaikat',
+            'description' => 'Pembahasan tentang keimanan kepada malaikat',
+            'order' => 2
         ]);
 
         // Create discussions
@@ -67,16 +114,23 @@ class SampleDataSeeder extends Seeder
         ]);
 
         $discussion2 = Discussion::create([
-            'chapter_id' => $chapter2->id,
+            'chapter_id' => $chapter2_1->id,
             'title' => 'Rukun Jual Beli',
             'content' => 'Rukun jual beli ada tiga: 1) Aqidain (dua pihak yang berakad), 2) Maqud alaih (barang yang diperjualbelikan), 3) Shighat (lafadz akad).',
             'order' => 1
         ]);
 
         $discussion3 = Discussion::create([
-            'chapter_id' => $chapter3->id,
+            'chapter_id' => $chapter4->id,
             'title' => 'Pengertian Ijarah',
             'content' => 'Ijarah adalah akad atas manfaat dengan imbalan. Ijarah dibagi menjadi dua: ijarah atas barang dan ijarah atas pekerjaan.',
+            'order' => 1
+        ]);
+
+        $discussion4 = Discussion::create([
+            'chapter_id' => $chapter6->id,
+            'title' => 'Wujud Allah',
+            'content' => 'Allah SWT adalah Dzat yang wajib wujud, tidak ada yang menyerupai-Nya dan Dia tidak menyerupai sesuatu.',
             'order' => 1
         ]);
 
@@ -95,6 +149,6 @@ class SampleDataSeeder extends Seeder
 
         // Create relations between masail and discussions
         $masail1->discussions()->attach([$discussion1->id, $discussion2->id]);
-        $masail2->discussions()->attach([$discussion1->id]);
+        $masail2->discussions()->attach([$discussion1->id, $discussion3->id]);
     }
 }

@@ -89,19 +89,43 @@ class ChapterManagement extends Component
 
     public function render()
     {
-        $chapters = Chapter::where('book_id', $this->bookId)
-            ->with(['parent', 'children'])
-            ->orderBy('order')
-            ->paginate(20);
+        // Get hierarchical chapters
+        $hierarchicalChapters = $this->getAllChaptersHierarchical();
 
         $availableParents = Chapter::where('book_id', $this->bookId)
-            ->whereNull('parent_id')
             ->orderBy('order')
             ->get();
 
         return view('livewire.admin.chapter-management', [
-            'chapters' => $chapters,
+            'hierarchicalChapters' => $hierarchicalChapters,
             'availableParents' => $availableParents,
         ]);
+    }
+
+    // Helper method to get all chapters flattened for hierarchy display
+    public function getAllChaptersHierarchical()
+    {
+        $chapters = Chapter::where('book_id', $this->bookId)
+            ->with(['parent', 'children'])
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->get();
+
+        $result = [];
+        foreach ($chapters as $chapter) {
+            $this->flattenChapters($chapter, $result, 0);
+        }
+        
+        return $result;
+    }
+
+    private function flattenChapters($chapter, &$result, $level)
+    {
+        $chapter->level = $level;
+        $result[] = $chapter;
+        
+        foreach ($chapter->children()->orderBy('order')->get() as $child) {
+            $this->flattenChapters($child, $result, $level + 1);
+        }
     }
 }

@@ -130,67 +130,81 @@
         </div>
     @endif
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Judul Bab
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bab Induk
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Urutan
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Sub Bab
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aksi
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @foreach($chapters as $chapter)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $chapter->title }}</div>
+    <!-- Hierarchical Chapter Display -->
+    <div class="space-y-4">
+        @foreach($hierarchicalChapters as $chapter)
+            <div class="bg-white border border-gray-200 rounded-lg" 
+                 style="margin-left: {{ $chapter->level * 2 }}rem;">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                @if($chapter->level > 0)
+                                    <span class="text-gray-400">
+                                        @for($i = 0; $i < $chapter->level; $i++)
+                                            └─
+                                        @endfor
+                                    </span>
+                                @endif
+                                
+                                <h5 class="text-lg font-semibold text-gray-900">
+                                    @if($chapter->level === 0)
+                                        📖 {{ $chapter->title }}
+                                    @elseif($chapter->level === 1)
+                                        📄 {{ $chapter->title }}
+                                    @else
+                                        📝 {{ $chapter->title }}
+                                    @endif
+                                </h5>
+                                
+                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                                    Urutan: {{ $chapter->order }}
+                                </span>
+                                
+                                @if($chapter->children->count() > 0)
+                                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                        {{ $chapter->children->count() }} sub bab
+                                    </span>
+                                @endif
+                            </div>
+                            
                             @if($chapter->description)
-                                <div class="text-sm text-gray-500">{{ Str::limit($chapter->description, 50) }}</div>
+                                <p class="text-gray-600 text-sm mt-2" style="margin-left: {{ $chapter->level > 0 ? '2rem' : '0' }};">
+                                    {{ $chapter->description }}
+                                </p>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $chapter->parent ? $chapter->parent->title : '-' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $chapter->order }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $chapter->children->count() }} sub bab
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            
+                            @if($chapter->parent)
+                                <p class="text-xs text-gray-500 mt-1" style="margin-left: {{ $chapter->level > 0 ? '2rem' : '0' }};">
+                                    Sub bab dari: {{ $chapter->parent->title }}
+                                </p>
+                            @endif
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
                             <button wire:click="editChapter({{ $chapter->id }})" 
-                                    class="text-indigo-600 hover:text-indigo-900">
+                                    class="px-3 py-1 text-sm text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded">
                                 Edit
                             </button>
                             <button wire:click="deleteChapter({{ $chapter->id }})" 
-                                    onclick="return confirm('Apakah Anda yakin ingin menghapus bab ini?')"
-                                    class="text-red-600 hover:text-red-900">
+                                    onclick="return confirm('Apakah Anda yakin ingin menghapus bab ini dan semua sub babnya?')"
+                                    class="px-3 py-1 text-sm text-red-600 hover:text-red-900 hover:bg-red-50 rounded">
                                 Hapus
                             </button>
                             <a href="{{ route('admin.books.discussions', ['bookId' => $bookId, 'chapterId' => $chapter->id]) }}" 
-                               class="text-green-600 hover:text-green-900">
+                               class="px-3 py-1 text-sm text-green-600 hover:text-green-900 hover:bg-green-50 rounded border border-green-200">
                                 Kelola Pembahasan
                             </a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="mt-6">
-        {{ $chapters->links() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+        
+        @if(empty($hierarchicalChapters))
+            <div class="text-center py-8">
+                <p class="text-gray-500">Belum ada bab dalam kitab ini.</p>
+            </div>
+        @endif
     </div>
 </div>

@@ -70,6 +70,35 @@ class BookReader extends Component
         $this->selectedDiscussion = null;
     }
 
+    // Helper method to get all chapters flattened for hierarchy display
+    public function getAllChaptersHierarchical()
+    {
+        if (!$this->book) return [];
+        
+        $chapters = Chapter::where('book_id', $this->book->id)
+            ->with(['parent', 'children'])
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->get();
+
+        $result = [];
+        foreach ($chapters as $chapter) {
+            $this->flattenChapters($chapter, $result, 0);
+        }
+        
+        return $result;
+    }
+
+    private function flattenChapters($chapter, &$result, $level)
+    {
+        $chapter->level = $level;
+        $result[] = $chapter;
+        
+        foreach ($chapter->children()->orderBy('order')->get() as $child) {
+            $this->flattenChapters($child, $result, $level + 1);
+        }
+    }
+
     public function render()
     {
         $data = [];
@@ -79,7 +108,7 @@ class BookReader extends Component
                 $data['books'] = Book::latest()->paginate(12);
                 break;
             case 'chapters':
-                $data['chapters'] = $this->book ? $this->book->chapters()->paginate(20) : collect();
+                // Hierarchical chapters will be handled in the view via getAllChaptersHierarchical()
                 break;
             case 'discussions':
                 $data['discussions'] = $this->selectedChapter ? $this->selectedChapter->discussions()->paginate(20) : collect();
