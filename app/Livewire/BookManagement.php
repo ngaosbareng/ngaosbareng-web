@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire;
 
 use App\Models\Book;
 use Livewire\Component;
@@ -29,6 +29,7 @@ class BookManagement extends Component
         Book::create([
             'title' => $this->title,
             'description' => $this->description,
+            'user_id' => auth()->id(),
         ]);
 
         $this->reset(['title', 'description', 'showCreateForm']);
@@ -37,7 +38,7 @@ class BookManagement extends Component
 
     public function editBook($bookId)
     {
-        $this->editingBook = Book::findOrFail($bookId);
+        $this->editingBook = Book::where('user_id', auth()->id())->findOrFail($bookId);
         $this->title = $this->editingBook->title;
         $this->description = $this->editingBook->description;
         $this->showEditForm = true;
@@ -58,7 +59,7 @@ class BookManagement extends Component
 
     public function deleteBook($bookId)
     {
-        Book::findOrFail($bookId)->delete();
+        Book::where('user_id', auth()->id())->findOrFail($bookId)->delete();
         $this->dispatch('book-deleted');
     }
 
@@ -69,8 +70,8 @@ class BookManagement extends Component
 
     public function render()
     {
-        return view('livewire.admin.book-management', [
-            'books' => Book::latest()->paginate(10),
+        return view('livewire.book-management', [
+            'books' => Book::where('user_id', auth()->id())->latest()->paginate(10),
         ]);
     }
 }

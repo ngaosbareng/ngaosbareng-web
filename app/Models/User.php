@@ -23,7 +23,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
@@ -63,19 +62,19 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    /**
-     * Check if user is admin
-     */
-    public function isAdmin(): bool
+    // User relationships
+    public function books()
     {
-        return $this->role === 'admin';
+        return $this->hasMany(Book::class);
     }
 
-    /**
-     * Check if user is member
-     */
-    public function isMember(): bool
+    public function masail()
     {
-        return $this->role === 'member';
+        return $this->hasMany(Masail::class);
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(Exam::class);
     }
 }

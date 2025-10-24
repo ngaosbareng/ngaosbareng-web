@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -45,7 +45,9 @@ class MasailManagement extends Component
     public function openEditForm($masailId)
     {
         $this->resetForm();
-        $this->selectedMasail = Masail::with('discussions')->findOrFail($masailId);
+        $this->selectedMasail = Masail::where('user_id', auth()->id())
+                                    ->with('discussions')
+                                    ->findOrFail($masailId);
         $this->title = $this->selectedMasail->title;
         $this->question = $this->selectedMasail->question;
         $this->description = $this->selectedMasail->description;
@@ -67,6 +69,7 @@ class MasailManagement extends Component
             'title' => $this->title,
             'question' => $this->question,
             'description' => $this->description,
+            'user_id' => auth()->id(),
         ]);
 
         $masail->discussions()->attach($this->selectedDiscussions);
@@ -99,7 +102,7 @@ class MasailManagement extends Component
 
     public function delete($masailId)
     {
-        $masail = Masail::findOrFail($masailId);
+        $masail = Masail::where('user_id', auth()->id())->findOrFail($masailId);
         $masail->discussions()->detach();
         $masail->delete();
 
@@ -108,7 +111,9 @@ class MasailManagement extends Component
 
     public function render()
     {
+        // Only show current user's masail
         $masail = Masail::with('discussions.chapter.book')
+            ->where('user_id', auth()->id())
             ->when($this->search, function ($query) {
                 return $query->where('title', 'like', '%' . $this->search . '%')
                            ->orWhere('question', 'like', '%' . $this->search . '%');
@@ -116,9 +121,12 @@ class MasailManagement extends Component
             ->latest()
             ->paginate(10);
 
-        $discussions = Discussion::with('chapter.book')->get();
+        // Only show discussions from current user's books
+        $discussions = Discussion::whereHas('chapter.book', function ($query) {
+            $query->where('user_id', auth()->id());
+        })->with('chapter.book')->get();
 
-        return view('livewire.admin.masail-management', [
+        return view('livewire.masail-management', [
             'masail' => $masail,
             'discussions' => $discussions
         ]);

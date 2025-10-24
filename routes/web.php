@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
-use App\Http\Controllers\Admin\BookController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\LibraryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,16 +15,22 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Admin Routes
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// User's Own Content Routes
+Route::middleware(['auth'])->group(function () {
+    // Books Management - User's own books
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
     Route::get('/books/{id}', [BookController::class, 'show'])->name('books.show');
     Route::get('/books/{bookId}/chapters/{chapterId}/discussions', [BookController::class, 'discussions'])->name('books.discussions');
     
-    // Masail Management Route
+    // Masail Management - User's own masail
     Route::get('/masail', function () {
-        return view('admin.masail');
-    })->name('masail');
+        return view('masail.index');
+    })->name('masail.index');
+    
+    // Library - Browse other users' content
+    Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
+    Route::get('/library/books/{id}', [LibraryController::class, 'showBook'])->name('library.books.show');
+    Route::get('/library/masail/{id}', [LibraryController::class, 'showMasail'])->name('library.masail.show');
 });
 
 // Exam Routes
@@ -32,17 +39,6 @@ Route::middleware(['auth'])->prefix('exams')->name('exams.')->group(function () 
     Route::get('/start', [ExamController::class, 'start'])->name('start');
     Route::get('/{id}', [ExamController::class, 'show'])->name('show');
     Route::get('/results', [ExamController::class, 'results'])->name('results');
-});
-
-// Book Reading Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/books', function () {
-        return view('books.index');
-    })->name('books.index');
-    
-    Route::get('/books/{id}', function ($id) {
-        return view('books.show', compact('id'));
-    })->name('books.show');
 });
 
 Route::middleware(['auth'])->group(function () {
