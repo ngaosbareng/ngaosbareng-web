@@ -18,6 +18,7 @@ Route::view('dashboard', 'dashboard')
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
     Route::get('/books/{id}', [BookController::class, 'show'])->name('books.show');
+    Route::get('/books/{bookId}/chapters/{chapterId}/discussions', [BookController::class, 'discussions'])->name('books.discussions');
 });
 
 // Exam Routes

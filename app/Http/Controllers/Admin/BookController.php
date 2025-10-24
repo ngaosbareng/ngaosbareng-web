@@ -26,4 +26,14 @@ class BookController extends Controller
 
         return view('admin.books.show', compact('id'));
     }
+
+    public function discussions($bookId, $chapterId)
+    {
+        // Check if user is admin
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return view('admin.books.discussions', compact('bookId', 'chapterId'));
+    }
 }

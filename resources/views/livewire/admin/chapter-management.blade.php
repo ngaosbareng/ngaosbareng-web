@@ -179,7 +179,7 @@
                                     class="text-red-600 hover:text-red-900">
                                 Hapus
                             </button>
-                            <a href="{{ route('admin.books.show', ['id' => $bookId, 'chapter' => $chapter->id]) }}" 
+                            <a href="{{ route('admin.books.discussions', ['bookId' => $bookId, 'chapterId' => $chapter->id]) }}" 
                                class="text-green-600 hover:text-green-900">
                                 Kelola Pembahasan
                             </a>
