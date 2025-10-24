@@ -7,7 +7,7 @@
                 <p class="text-gray-600">{{ $chapter->description }}</p>
                 <p class="text-sm text-gray-500 mt-1">Kitab: {{ $book->title }}</p>
             </div>
-            <a href="{{ route('admin.books.show', $bookId) }}" 
+            <a href="{{ route('books.show', $bookId) }}" 
                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                 Kembali ke Daftar Bab
             </a>

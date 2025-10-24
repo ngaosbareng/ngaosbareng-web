@@ -6,7 +6,7 @@
                 <h3 class="text-xl font-bold text-gray-900">{{ $book->title }}</h3>
                 <p class="text-gray-600">{{ $book->description }}</p>
             </div>
-            <a href="{{ route('admin.books.index') }}" 
+            <a href="{{ route('books.index') }}" 
                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                 Kembali ke Daftar Kitab
             </a>
@@ -191,7 +191,7 @@
                                     class="px-3 py-1 text-sm text-red-600 hover:text-red-900 hover:bg-red-50 rounded">
                                 Hapus
                             </button>
-                            <a href="{{ route('admin.books.discussions', ['bookId' => $bookId, 'chapterId' => $chapter->id]) }}" 
+                            <a href="{{ route('books.discussions', ['bookId' => $bookId, 'chapterId' => $chapter->id]) }}" 
                                class="px-3 py-1 text-sm text-green-600 hover:text-green-900 hover:bg-green-50 rounded border border-green-200">
                                 Kelola Pembahasan
                             </a>
