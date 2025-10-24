@@ -26,23 +26,21 @@
                                 </div>
                             </a>
                             
-                            <a href="{{ route('admin.books.index') }}" 
-                               class="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 transition-colors">
-                                <div class="flex items-center">
-                                    <div class="p-2 bg-green-500 rounded-lg">
-                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h3 class="text-lg font-semibold text-gray-900">Kelola Masail</h3>
-                                        <p class="text-gray-600">Manage masail and their relations</p>
-                                    </div>
-                                </div>
-                            </a>
-                            
-                            <a href="{{ route('exams.index') }}" 
+            <a href="{{ route('admin.masail') }}" 
+               class="bg-green-50 border border-green-200 rounded-lg p-6 hover:bg-green-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-500 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Kelola Masail</h3>
+                        <p class="text-gray-600">Kelola kumpulan pertanyaan yang merujuk ke pembahasan dari berbagai kitab</p>
+                    </div>
+                </div>
+            </a>                            <a href="{{ route('exams.index') }}" 
                                class="bg-purple-50 border border-purple-200 rounded-lg p-6 hover:bg-purple-100 transition-colors">
                                 <div class="flex items-center">
                                     <div class="p-2 bg-purple-500 rounded-lg">
@@ -88,7 +86,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <h3 class="text-lg font-semibold text-gray-900">Mulai Ujian</h3>
-                                        <p class="text-gray-600">Take masail examination</p>
+                                        <p class="text-gray-600">Ikuti ujian masail - pertanyaan yang merujuk ke berbagai kitab</p>
                                     </div>
                                 </div>
                             </a>

@@ -134,21 +134,59 @@ class SampleDataSeeder extends Seeder
             'order' => 1
         ]);
 
-        // Create masail
+        // Buat pembahasan tambahan dari kitab berbeda tentang topic yang sama
+        $discussion5 = Discussion::create([
+            'chapter_id' => $chapter3->id, // Kitab berbeda tapi topik sama (jual beli)
+            'title' => 'Syarat Sahnya Jual Beli - Versi Kitab Fiqh Muamalah',
+            'content' => 'Untuk sahnya jual beli diperlukan: baligh, berakal, tidak dipaksa, barang halal, harga jelas, dan serah terima dapat dilakukan.',
+            'order' => 1
+        ]);
+
+        $discussion6 = Discussion::create([
+            'chapter_id' => $chapter5->id, // Kitab lain dengan topik serupa
+            'title' => 'Rukun Ijarah Menurut Madzhab Syafii',
+            'content' => 'Rukun ijarah menurut madzhab Syafii: mu\'jir (yang menyewakan), musta\'jir (penyewa), ujrah (upah), dan manfaat yang disewa.',
+            'order' => 1
+        ]);
+
+        // Create masail - pertanyaan yang merujuk ke pembahasan dari berbagai kitab
         $masail1 = Masail::create([
             'title' => 'Hukum Jual Beli dengan Sistem Kredit',
-            'question' => 'Bagaimana hukum jual beli dengan sistem pembayaran kredit atau cicilan?',
-            'description' => 'Masail tentang kebolehan jual beli dengan sistem pembayaran tidak tunai'
+            'question' => 'Bagaimana hukum jual beli dengan sistem pembayaran kredit atau cicilan menurut berbagai pendapat ulama?',
+            'description' => 'Masail tentang kebolehan jual beli dengan sistem pembayaran tidak tunai berdasarkan berbagai sumber kitab fiqh'
         ]);
 
         $masail2 = Masail::create([
-            'title' => 'Jual Beli Barang yang Belum Ada',
-            'question' => 'Apakah boleh menjual barang yang belum ada atau belum dikuasai?',
-            'description' => 'Masail tentang jual beli barang yang belum wujud'
+            'title' => 'Perbedaan Rukun dan Syarat dalam Akad',
+            'question' => 'Apa perbedaan antara rukun dan syarat dalam akad menurut pandangan madzhab yang berbeda?',
+            'description' => 'Masail tentang konsep rukun dan syarat dalam berbagai jenis akad'
         ]);
 
-        // Create relations between masail and discussions
-        $masail1->discussions()->attach([$discussion1->id, $discussion2->id]);
-        $masail2->discussions()->attach([$discussion1->id, $discussion3->id]);
+        $masail3 = Masail::create([
+            'title' => 'Jual Beli Barang yang Belum Dikuasai',
+            'question' => 'Bagaimana hukum menjual barang yang belum dikuasai sepenuhnya oleh penjual?',
+            'description' => 'Masail tentang jual beli barang yang belum berada dalam penguasaan penjual'
+        ]);
+
+        // Hubungkan masail dengan pembahasan dari berbagai kitab
+        // Masail 1: merujuk ke pembahasan jual beli dari 2 kitab berbeda
+        $masail1->discussions()->attach([
+            $discussion1->id, // Definisi dari Kitab Fiqh Jual Beli
+            $discussion5->id  // Syarat sah dari Kitab Fiqh Muamalah
+        ]);
+
+        // Masail 2: merujuk ke pembahasan rukun dari 3 kitab berbeda  
+        $masail2->discussions()->attach([
+            $discussion2->id, // Rukun jual beli
+            $discussion5->id, // Syarat jual beli (kitab lain)
+            $discussion6->id  // Rukun ijarah (konteks serupa)
+        ]);
+
+        // Masail 3: merujuk ke pembahasan dari berbagai sumber
+        $masail3->discussions()->attach([
+            $discussion1->id, // Definisi jual beli
+            $discussion3->id, // Pengertian ijarah (konteks terkait)
+            $discussion5->id  // Syarat sah jual beli
+        ]);
     }
 }
