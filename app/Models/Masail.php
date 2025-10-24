@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Masail extends Model
 {
+    protected $table = 'masail';
+    
     protected $fillable = [
         'title',
         'question',

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('exam_answers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('exam_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('masail_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('masail_id')->constrained('masail')->cascadeOnDelete();
             $table->foreignId('discussion_id')->constrained()->cascadeOnDelete();
             $table->boolean('is_correct')->nullable(); // true if the discussion is related to masail, false if not, null if not answered yet
             $table->boolean('user_answer')->nullable(); // user's answer: true = related, false = not related
