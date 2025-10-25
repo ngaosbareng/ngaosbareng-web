@@ -23,10 +23,13 @@ class ChapterIndex extends Component
     
     public function resetNewChapter()
     {
+        // Get max order and add 1
+        $maxOrder = Chapter::where('book_id', $this->book->id)->max('order') ?? 0;
+        
         $this->newChapter = [
             'title' => '',
             'description' => '',
-            'level' => 0,
+            'order' => $maxOrder + 1,
         ];
     }
 
@@ -41,13 +44,13 @@ class ChapterIndex extends Component
         $validated = $this->validate([
             'newChapter.title' => 'required|string|max:255',
             'newChapter.description' => 'nullable|string',
-            'newChapter.level' => 'required|integer|min:0|max:2',
+            'newChapter.order' => 'required|integer|min:1',
         ]);
 
         $this->book->chapters()->create([
             'title' => $validated['newChapter']['title'],
             'description' => $validated['newChapter']['description'],
-            'level' => $validated['newChapter']['level'],
+            'order' => $validated['newChapter']['order'],
         ]);
 
         $this->resetNewChapter();
@@ -82,7 +85,7 @@ class ChapterIndex extends Component
             'id' => $chapter->id,
             'title' => $chapter->title,
             'description' => $chapter->description,
-            'level' => $chapter->level,
+            'order' => $chapter->order,
         ];
         
         $this->dispatch('edit-chapter-modal');
@@ -94,14 +97,14 @@ class ChapterIndex extends Component
         $validated = $this->validate([
             'editingChapter.title' => 'required|string|max:255',
             'editingChapter.description' => 'nullable|string',
-            'editingChapter.level' => 'required|integer|min:0|max:2',
+            'editingChapter.order' => 'required|integer|min:1',
         ]);
         
         $chapter = Chapter::find($this->editingChapter['id']);
         $chapter->update([
-            'title' => $validated['editingChapter']['title'], // Gunakan nilai yang divalidasi
+            'title' => $validated['editingChapter']['title'],
             'description' => $validated['editingChapter']['description'],
-            'level' => $validated['editingChapter']['level'],
+            'order' => $validated['editingChapter']['order'],
         ]);
 
         session()->flash('message', 'Bab berhasil diperbarui');
@@ -137,36 +140,18 @@ class ChapterIndex extends Component
         $this->dispatch('close-modal');
     }
 
-    public function getAllChaptersHierarchical()
+    public function getChapters()
     {
-        $chapters = Chapter::where('book_id', $this->book->id)
-            ->with(['parent', 'children', 'discussions'])
-            ->whereNull('parent_id')
+        return Chapter::where('book_id', $this->book->id)
+            ->with(['discussions'])
             ->orderBy('order')
             ->get();
-
-        $result = [];
-        foreach ($chapters as $chapter) {
-            $this->flattenChapters($chapter, $result, 0);
-        }
-        
-        return $result;
-    }
-
-    private function flattenChapters($chapter, &$result, $level)
-    {
-        $chapter->level = $level;
-        $result[] = $chapter;
-        
-        foreach ($chapter->children()->orderBy('order')->get() as $child) {
-            $this->flattenChapters($child, $result, $level + 1);
-        }
     }
 
     public function render()
     {
         return view('livewire.books.chapter-index', [
-            'chapters' => $this->getAllChaptersHierarchical()
+            'chapters' => $this->getChapters()
         ]);
     }
 }

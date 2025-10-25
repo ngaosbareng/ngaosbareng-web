@@ -79,15 +79,15 @@
                         }
                     @endphp
 
-                    <div class="block border rounded-xl p-5 transition-all duration-300 ease-in-out hover:shadow-xl {{ $level_class }}"
-                        style="margin-left: {{ $level_indent }}px;">
+                    <div class="block border rounded-xl p-5 transition-all duration-300 ease-in-out hover:shadow-xl bg-white border-gray-200">
                         <div class="flex items-start justify-between">
                             {{-- Info Bab --}}
                             <div class="flex items-start flex-1 mr-4">
-                                <span class="text-2xl mr-4 mt-0.5"
-                                    title="Level {{ $chapter->level }}">{{ $level_icon }}</span>
+                                <span class="text-lg font-bold mr-4 text-indigo-600 bg-indigo-50 rounded-full w-8 h-8 flex items-center justify-center">
+                                    {{ $chapter->order }}
+                                </span>
                                 <div class="w-full">
-                                    <h4 class="text-lg text-gray-900 leading-snug @if($chapter->level == 0) text-xl @endif">
+                                    <h4 class="text-lg text-gray-900 leading-snug">
                                         {{-- Catatan: Rute 'books.discussions' harus menerima model Chapter --}}
                                         <a href="{{ route('books.discussions', $chapter) }}" class="hover:underline focus:outline-none focus:ring focus:ring-indigo-300 rounded-md">
                                             {{ $chapter->title }}
@@ -207,14 +207,11 @@
                                         @error('newChapter.description') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label for="newChapter.level" class="block text-sm font-medium text-gray-700">Level</label>
-                                        <select wire:model.defer="newChapter.level" id="newChapter.level"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                            <option value="0">Kitab (Tingkat Utama)</option>
-                                            <option value="1">Bab (Tingkat Kedua)</option>
-                                            <option value="2">Sub Bab (Tingkat Ketiga)</option>
-                                        </select>
-                                        @error('newChapter.level') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                        <label for="newChapter.order" class="block text-sm font-medium text-gray-700">Urutan</label>
+                                        <input type="number" wire:model.defer="newChapter.order" id="newChapter.order"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            min="1">
+                                        @error('newChapter.order') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                             </div>
@@ -278,14 +275,11 @@
                                         @error('editingChapter.description') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label for="editingChapter.level" class="block text-sm font-medium text-gray-700">Level</label>
-                                        <select wire:model.defer="editingChapter.level" id="editingChapter.level"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                            <option value="0">Kitab (Tingkat Utama)</option>
-                                            <option value="1">Bab (Tingkat Kedua)</option>
-                                            <option value="2">Sub Bab (Tingkat Ketiga)</option>
-                                        </select>
-                                        @error('editingChapter.level') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                        <label for="editingChapter.order" class="block text-sm font-medium text-gray-700">Urutan</label>
+                                        <input type="number" wire:model.defer="editingChapter.order" id="editingChapter.order"
+                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            min="1">
+                                        @error('editingChapter.order') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
                             </div>
