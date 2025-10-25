@@ -15,12 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         DB::beginTransaction();
-        
-        User::factory(10)->create();
+
         $this->call([
             UserSeeder::class,
             SampleDataSeeder::class,
         ]);
+        User::factory(10)->create();
 
         DB::commit();
     }
