@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SampleDataSeeder::class,
         ]);
-        User::factory(10)->create();
 
         DB::commit();
     }

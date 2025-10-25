@@ -21,21 +21,5 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-
-        // Create User 2
-        User::create([
-            'name' => 'Fatimah Santri',
-            'email' => 'fatimah@ngaosbareng.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-
-        // Create User 3
-        User::create([
-            'name' => 'Ali Santri',
-            'email' => 'ali@ngaosbareng.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
     }
 }
