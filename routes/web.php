@@ -30,13 +30,6 @@ Route::middleware(['auth'])
     
     // Masail Management - User's own masail
     Route::view('/masail', 'masail.index')->name('masail.index');
-
-    // Library - Browse other users' content
-    Route::prefix('library')->name('library.')->group(function () {
-        Route::get('/', [LibraryController::class, 'index'])->name('index');
-        Route::get('/books/{id}', [LibraryController::class, 'showBook'])->name('books.show');
-        Route::get('/masail/{id}', [LibraryController::class, 'showMasail'])->name('masail.show');
-    });
 });
 
 // Exam Routes
