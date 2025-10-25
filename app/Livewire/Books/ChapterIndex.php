@@ -22,6 +22,7 @@ class ChapterIndex extends Component
     public $book;
 
     public $selectedChapterId = '';
+    public $parentChapterId = null;
 
     public function mount(Book $book)
     {
@@ -163,9 +164,17 @@ class ChapterIndex extends Component
             'newChapter.description' => 'nullable|string',
             'newChapter.order' => 'nullable|integer|min:1',
             'orderPosition' => 'required|in:start,end,custom',
+            'parentChapterId' => 'nullable|exists:chapters,id',
         ]);
 
-        $lastOrder = $this->book->chapters()->max('order') ?? 0;
+        $query = $this->book->chapters();
+        
+        if ($this->parentChapterId) {
+            $parentChapter = Chapter::find($this->parentChapterId);
+            $lastOrder = $parentChapter->children()->max('order') ?? 0;
+        } else {
+            $lastOrder = $query->whereNull('parent_id')->max('order') ?? 0;
+        }
         
         $order = match($this->orderPosition) {
             'start' => 1,
@@ -176,7 +185,11 @@ class ChapterIndex extends Component
 
         // If inserting at start or custom position, shift existing chapters
         if ($this->orderPosition === 'start' || ($this->orderPosition === 'custom' && $order <= $lastOrder)) {
-            $this->book->chapters()
+            $query->when($this->parentChapterId, function ($q) use ($order) {
+                    $q->where('parent_id', $this->parentChapterId);
+                }, function ($q) {
+                    $q->whereNull('parent_id');
+                })
                 ->where('order', '>=', $order)
                 ->increment('order');
         }
@@ -185,6 +198,7 @@ class ChapterIndex extends Component
             'title' => $this->newChapter['title'],
             'description' => $this->newChapter['description'],
             'order' => $order,
+            'parent_id' => $this->parentChapterId,
         ]);
 
         $this->resetNewChapter();
@@ -210,7 +224,7 @@ class ChapterIndex extends Component
 
     public function resetNewChapter()
     {
-        $this->reset('newChapter', 'orderPosition');
+        $this->reset(['newChapter', 'orderPosition', 'parentChapterId']);
     }
 
     public function resetNewDiscussion()

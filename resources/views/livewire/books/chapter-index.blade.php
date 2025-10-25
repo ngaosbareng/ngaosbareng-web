@@ -35,13 +35,16 @@
                     </svg>
                     <span>Kembali ke Daftar Kitab</span>
                 </a>
-                <button x-data @click="$dispatch('create-modal')"
+                <button x-data @click="$dispatch('create-modal'); $nextTick(() => { 
+                        type = 'chapter';
+                        $wire.set('parentChapterId', null);
+                    })"
                     class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:scale-[1.02]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span class="font-semibold">Tambah Bab/Pembahasan</span>
+                    <span class="font-semibold">Tambah Bab Utama</span>
                 </button>
             </div>
         </div>
@@ -107,8 +110,24 @@
                                     class="text-sm font-bold text-indigo-700 bg-indigo-200/50 px-3 py-1 rounded-full whitespace-nowrap hidden sm:block">
                                     {{ $chapter->discussions->count() }} Pembahasan
                                 </div>
+                                {{-- Add Sub Chapter --}}
+                                <button x-data @click="$dispatch('create-modal'); $nextTick(() => { 
+                                        type = 'chapter';
+                                        $wire.set('parentChapterId', {{ $chapter->id }});
+                                    })"
+                                    class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
+                                    aria-label="Tambah Sub-Bab di {{ $chapter->title }}"
+                                    title="Tambah Sub-Bab">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </button>
                                 {{-- Add Discussion --}}
-                                <button x-data @click="$dispatch('create-modal'); $nextTick(() => { type = 'discussion'; document.getElementById('selectedChapterId').value = {{ $chapter->id }} })"
+                                <button x-data @click="$dispatch('create-modal'); $nextTick(() => { 
+                                        type = 'discussion'; 
+                                        $wire.set('selectedChapterId', {{ $chapter->id }}); 
+                                    })"
                                     class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-100 transition"
                                     aria-label="Tambah Pembahasan untuk {{ $chapter->title }}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,6 +227,7 @@
                         {{-- Chapter Form --}}
                         <form x-show="type === 'chapter'" wire:submit.prevent="storeChapter" class="mt-4">
                             <div class="space-y-4">
+                                <div wire:model="parentChapterId" hidden></div>
                                 <div>
                                     <label for="newChapter.title" class="block text-sm font-medium text-gray-700">Judul Bab</label>
                                     <input type="text" wire:model.blur="newChapter.title" id="newChapter.title" 
