@@ -18,11 +18,13 @@ class SampleDataSeeder extends Seeder
     {
         // Create sample books
         $book1 = Book::create([
+            'user_id' => 1,
             'title' => 'Fiqh Muamalah',
             'description' => 'Kitab yang membahas tentang hukum-hukum dalam bermuamalah antar sesama manusia, termasuk jual beli, sewa menyewa, dan lain-lain.'
         ]);
 
         $book2 = Book::create([
+            'user_id' => 1,
             'title' => 'Akidah Islamiyah',
             'description' => 'Kitab yang membahas tentang dasar-dasar kepercayaan dalam Islam, meliputi rukun iman dan hal-hal yang berkaitan dengan akidah.'
         ]);
@@ -151,18 +153,21 @@ class SampleDataSeeder extends Seeder
 
         // Create masail - pertanyaan yang merujuk ke pembahasan dari berbagai kitab
         $masail1 = Masail::create([
+            'user_id' => 1,
             'title' => 'Hukum Jual Beli dengan Sistem Kredit',
             'question' => 'Bagaimana hukum jual beli dengan sistem pembayaran kredit atau cicilan menurut berbagai pendapat ulama?',
             'description' => 'Masail tentang kebolehan jual beli dengan sistem pembayaran tidak tunai berdasarkan berbagai sumber kitab fiqh'
         ]);
 
         $masail2 = Masail::create([
+            'user_id' => 1,
             'title' => 'Perbedaan Rukun dan Syarat dalam Akad',
             'question' => 'Apa perbedaan antara rukun dan syarat dalam akad menurut pandangan madzhab yang berbeda?',
             'description' => 'Masail tentang konsep rukun dan syarat dalam berbagai jenis akad'
         ]);
 
         $masail3 = Masail::create([
+            'user_id' => 1,
             'title' => 'Jual Beli Barang yang Belum Dikuasai',
             'question' => 'Bagaimana hukum menjual barang yang belum dikuasai sepenuhnya oleh penjual?',
             'description' => 'Masail tentang jual beli barang yang belum berada dalam penguasaan penjual'

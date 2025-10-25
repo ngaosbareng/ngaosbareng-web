@@ -18,11 +18,10 @@ class BookReader extends Component
     public $selectedDiscussion = null;
     public $viewMode = 'books'; // books, chapters, discussions, reading
 
-    public function mount($bookId = null)
+    public function mount($book = null)
     {
-        if ($bookId) {
-            $this->bookId = $bookId;
-            $this->book = Book::with('chapters')->findOrFail($bookId);
+        if ($book) {
+            $this->book = $book;
             $this->viewMode = 'chapters';
         }
     }
