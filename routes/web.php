@@ -27,7 +27,12 @@ Route::middleware(['auth'])
     });
     
     // Masail Management - User's own masail
-    Route::view('/masail', 'masail.index')->name('masail.index');
+    Route::prefix('masail')->name('masail.')->group(function () {
+        Route::get('/', \App\Livewire\MasailManagement::class)->name('index');
+        Route::get('/create', \App\Livewire\Masail\Create::class)->name('create');
+        Route::get('/{masail}/edit', \App\Livewire\Masail\Edit::class)->name('edit');
+        Route::get('/{masail}', \App\Livewire\Masail\Show::class)->name('show');
+    });
 });
 
 // Exam Routes
