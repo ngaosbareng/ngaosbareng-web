@@ -35,13 +35,13 @@
                     </svg>
                     <span>Kembali ke Daftar Kitab</span>
                 </a>
-                <button wire:click="createChapter"
+                <button x-data @click="$dispatch('create-modal')"
                     class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:scale-[1.02]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span class="font-semibold">Tambah Bab</span>
+                    <span class="font-semibold">Tambah Bab/Pembahasan</span>
                 </button>
             </div>
         </div>
@@ -56,12 +56,12 @@
         </div>
 
         {{-- Daftar Bab --}}
-        @if (count($chapters) > 0)
+        @if ($this->chapters->count() > 0)
             <h3 class="text-3xl font-extrabold text-gray-800 mb-7 tracking-tight">
                 Daftar Isi Kitab
             </h3>
             <div class="space-y-4">
-                @foreach ($chapters as $chapter)
+                @foreach ($this->chapters as $chapter)
                     @php
                         // Properti 'level' disuntikkan oleh function 'flattenChapters' di Livewire class
                         $level_indent = $chapter->level * 28;
@@ -108,7 +108,7 @@
                                     {{ $chapter->discussions->count() }} Pembahasan
                                 </div>
                                 {{-- Add Discussion --}}
-                                <button wire:click="addDiscussion({{ $chapter->id }})"
+                                <button x-data @click="$dispatch('create-modal'); $nextTick(() => { type = 'discussion'; document.getElementById('selectedChapterId').value = {{ $chapter->id }} })"
                                     class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-100 transition"
                                     aria-label="Tambah Pembahasan untuk {{ $chapter->title }}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,21 +152,21 @@
                     Mulai tambahkan bab pertama untuk kitab ini.
                 </p>
                 <div class="mt-6">
-                    <button wire:click="createChapter"
+                    <button x-data @click="$dispatch('create-modal')"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        <span>Tambah Bab Pertama</span>
+                        <span>Tambah Bab/Pembahasan</span>
                     </button>
                 </div>
             </div>
         @endif
     </section>
 
-    {{-- CREATE CHAPTER MODAL --}}
-    <div x-data="{ open: false }" @create-chapter-modal.window="open = true" @close-modal.window="open = false">
+    {{-- CREATE MODAL --}}
+    <div x-data="{ open: false, type: 'chapter' }" @create-modal.window="open = true" @close-modal.window="open = false">
         <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
@@ -179,54 +179,128 @@
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true"
-            aria-labelledby="create-chapter-modal-title">
+            aria-labelledby="create-modal-title">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form wire:submit.prevent="storeChapter">
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                                <button @click="open = false" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 p-1 transition" aria-label="Tutup Modal">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                            <button @click="open = false" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 p-1 transition" aria-label="Tutup Modal">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- Tab Selector --}}
+                        <div class="border-b border-gray-200">
+                            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                <button @click="type = 'chapter'" :class="{'border-indigo-500 text-indigo-600': type === 'chapter', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': type !== 'chapter'}"
+                                    class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+                                    Bab Baru
                                 </button>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold leading-6 text-gray-900" id="create-chapter-modal-title">Tambah Bab Baru</h3>
-                                <div class="mt-4 space-y-4">
-                                    <div>
-                                        <label for="newChapter.title" class="block text-sm font-medium text-gray-700">Judul</label>
-                                        <input type="text" wire:model.blur="newChapter.title" id="newChapter.title" 
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        @error('newChapter.title') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                <button @click="type = 'discussion'" :class="{'border-indigo-500 text-indigo-600': type === 'discussion', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': type !== 'discussion'}"
+                                    class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+                                    Pembahasan Baru
+                                </button>
+                            </nav>
+                        </div>
+
+                        {{-- Chapter Form --}}
+                        <form x-show="type === 'chapter'" wire:submit.prevent="storeChapter" class="mt-4">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="newChapter.title" class="block text-sm font-medium text-gray-700">Judul Bab</label>
+                                    <input type="text" wire:model.blur="newChapter.title" id="newChapter.title" 
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    @error('newChapter.title') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label for="newChapter.description" class="block text-sm font-medium text-gray-700">Deskripsi (Opsional)</label>
+                                    <textarea wire:model.blur="newChapter.description" id="newChapter.description" rows="3"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                    @error('newChapter.description') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Posisi</label>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center">
+                                            <input type="radio" wire:model="orderPosition" value="start" id="order-start"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                            <label for="order-start" class="ml-3 text-sm text-gray-700">Di awal (sebelum semua bab)</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" wire:model="orderPosition" value="end" id="order-end"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                            <label for="order-end" class="ml-3 text-sm text-gray-700">Di akhir (setelah semua bab)</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" wire:model="orderPosition" value="custom" id="order-custom"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                            <label for="order-custom" class="ml-3 text-sm text-gray-700">Urutan khusus</label>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label for="newChapter.description" class="block text-sm font-medium text-gray-700">Deskripsi (Opsional)</label>
-                                        <textarea wire:model.blur="newChapter.description" id="newChapter.description" rows="3"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                                        @error('newChapter.description') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label for="newChapter.order" class="block text-sm font-medium text-gray-700">Urutan</label>
-                                        <input type="number" wire:model.defer="newChapter.order" id="newChapter.order"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                            min="1">
-                                        @error('newChapter.order') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
-                                    </div>
+                                    @if($orderPosition === 'custom')
+                                        <div class="mt-3">
+                                            <label for="newChapter.order" class="block text-sm font-medium text-gray-700">Nomor Urut</label>
+                                            <input type="number" wire:model.defer="newChapter.order" id="newChapter.order"
+                                                class="mt-1 block w-24 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                min="1">
+                                        </div>
+                                    @endif
+                                    @error('newChapter.order') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
                                 </div>
                             </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                            <button type="submit"
-                                class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 sm:ml-3 sm:w-auto transition">
-                                Tambah Bab
-                            </button>
-                            <button @click="open = false" type="button"
-                                class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
+                            <div class="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
+                                <button type="submit"
+                                    class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 sm:ml-3 sm:w-auto transition">
+                                    Tambah Bab
+                                </button>
+                                <button @click="open = false" type="button"
+                                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+
+                        {{-- Discussion Form --}}
+                        <form x-show="type === 'discussion'" wire:submit.prevent="storeDiscussion" class="mt-4">
+                            <div class="space-y-4">
+                                <div class="mb-4">
+                                    <label for="selectedChapterId" class="block text-sm font-medium text-gray-700">Pilih Bab</label>
+                                    <select wire:model="selectedChapterId" id="selectedChapterId"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        <option value="">Pilih Bab</option>
+                                        @foreach($this->chapters as $chapter)
+                                            <option value="{{ $chapter->id }}">{{ $chapter->order }}. {{ $chapter->title }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('selectedChapterId') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label for="newDiscussion.title" class="block text-sm font-medium text-gray-700">Judul Pembahasan</label>
+                                    <input type="text" wire:model.blur="newDiscussion.title" id="newDiscussion.title" 
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    @error('newDiscussion.title') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label for="newDiscussion.content" class="block text-sm font-medium text-gray-700">Isi Pembahasan</label>
+                                    <textarea wire:model.blur="newDiscussion.content" id="newDiscussion.content" rows="5"
+                                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                    @error('newDiscussion.content') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                            <div class="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
+                                <button type="submit"
+                                    class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 sm:ml-3 sm:w-auto transition">
+                                    Tambah Pembahasan
+                                </button>
+                                <button @click="open = false" type="button"
+                                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -300,67 +374,6 @@
         </div>
     </div>
 
-    {{-- ADD DISCUSSION MODAL --}}
-    <div x-data="{ open: false }" @add-discussion-modal.window="open = true" @close-modal.window="open = false">
-        <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-[99]"></div>
-
-        <div x-show="open" x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true"
-            aria-labelledby="add-discussion-modal-title">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form wire:submit.prevent="storeDiscussion">
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                                <button @click="open = false" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 p-1 transition" aria-label="Tutup Modal">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold leading-6 text-gray-900" id="add-discussion-modal-title">Tambah Pembahasan Baru</h3>
-                                <div class="mt-4 space-y-4">
-                                    <div>
-                                        <label for="newDiscussion.title" class="block text-sm font-medium text-gray-700">Judul Pembahasan</label>
-                                        <input type="text" wire:model.blur="newDiscussion.title" id="newDiscussion.title" 
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                        {{-- CATATAN: Validasi untuk 'newDiscussion' perlu didefinisikan di Livewire class sebelum store --}}
-                                        @error('newDiscussion.title') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div>
-                                        <label for="newDiscussion.content" class="block text-sm font-medium text-gray-700">Isi Pembahasan</label>
-                                        <textarea wire:model.blur="newDiscussion.content" id="newDiscussion.content" rows="5"
-                                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                                        @error('newDiscussion.content') <span class="mt-1 text-xs text-red-600">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                            <button type="submit"
-                                class="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 sm:ml-3 sm:w-auto transition">
-                                Tambah Pembahasan
-                            </button>
-                            <button @click="open = false" type="button"
-                                class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     {{-- DELETE CHAPTER MODAL --}}
     <div x-data="{ open: false }" @delete-chapter-modal.window="open = true" @close-modal.window="open = false">
         <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"

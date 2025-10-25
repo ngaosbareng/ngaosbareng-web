@@ -4,154 +4,228 @@ namespace App\Livewire\Books;
 
 use App\Models\Book;
 use App\Models\Chapter;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Rule as LivewireRule;
 
 class ChapterIndex extends Component
 {
-    public Book $book;
-    public $editingChapter = [];
-    public $newChapter = [];
-    public $chapterToDelete;
-    public $newDiscussion = [];
-    public $selectedChapterId;
+    use WithPagination;
 
-    public function mount($book)
+    #[LivewireRule('exists:books,id')]
+    public $bookId;
+
+    public $book;
+
+    public $selectedChapterId = '';
+
+    public function mount(Book $book)
     {
         $this->book = $book;
-        $this->resetNewChapter();
+        $this->bookId = $book->id;
     }
-    
-    public function resetNewChapter()
+
+    protected function getListeners()
     {
-        // Get max order and add 1
-        $maxOrder = Chapter::where('book_id', $this->book->id)->max('order') ?? 0;
-        
-        $this->newChapter = [
-            'title' => '',
-            'description' => '',
-            'order' => $maxOrder + 1,
+        return [
+            'chapter-deleted' => 'updateOrder',
         ];
     }
 
-    public function createChapter()
+    public $orderPosition = 'end';
+
+    public $editingChapterId;
+
+    public $newChapter = [
+        'title' => '',
+        'description' => '',
+        'order' => null,
+    ];
+
+    public $newDiscussion = [
+        'title' => '',
+        'content' => '',
+    ];
+
+    public $editingChapter = [
+        'title' => '',
+        'description' => '',
+        'order' => null,
+    ];
+
+    #[Computed]
+    public function chapters(): Collection
     {
-        $this->resetNewChapter();
-        $this->dispatch('create-chapter-modal');
-    }
-
-    public function storeChapter()
-    {
-        $validated = $this->validate([
-            'newChapter.title' => 'required|string|max:255',
-            'newChapter.description' => 'nullable|string',
-            'newChapter.order' => 'required|integer|min:1',
-        ]);
-
-        $this->book->chapters()->create([
-            'title' => $validated['newChapter']['title'],
-            'description' => $validated['newChapter']['description'],
-            'order' => $validated['newChapter']['order'],
-        ]);
-
-        $this->resetNewChapter();
-        session()->flash('message', 'Bab berhasil ditambahkan');
-        $this->dispatch('close-modal');
-    }
-
-    public function confirmDeleteChapter($chapterId)
-    {
-        $this->chapterToDelete = $chapterId;
-        $this->dispatch('delete-chapter-modal');
-    }
-
-    public function deleteChapter()
-    {
-        $chapter = Chapter::findOrFail($this->chapterToDelete);
-        
-        // Delete all discussions first
-        $chapter->discussions()->delete();
-        
-        // Then delete the chapter
-        $chapter->delete();
-
-        session()->flash('message', 'Bab berhasil dihapus');
-        $this->dispatch('close-modal');
+        if (!$this->book) {
+            return collect();
+        }
+        return $this->book->chapters()->orderBy('order', 'asc')->get();
     }
 
     public function editChapter($chapterId)
     {
-        $chapter = Chapter::find($chapterId);
+        $chapter = $this->book->chapters()->findOrFail($chapterId);
+        $this->editingChapterId = $chapter->id;
         $this->editingChapter = [
-            'id' => $chapter->id,
             'title' => $chapter->title,
             'description' => $chapter->description,
             'order' => $chapter->order,
         ];
-        
+
         $this->dispatch('edit-chapter-modal');
     }
 
     public function updateChapter()
     {
-        // Tambahkan validasi di sini
-        $validated = $this->validate([
-            'editingChapter.title' => 'required|string|max:255',
+        $this->validate([
+            'editingChapter.title' => 'required|string|min:3',
             'editingChapter.description' => 'nullable|string',
-            'editingChapter.order' => 'required|integer|min:1',
+            'editingChapter.order' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('chapters', 'order')
+                    ->where('book_id', $this->bookId)
+                    ->ignore($this->editingChapterId),
+            ],
         ]);
-        
-        $chapter = Chapter::find($this->editingChapter['id']);
+
+        $chapter = $this->book->chapters()->findOrFail($this->editingChapterId);
+        $newOrder = $this->editingChapter['order'];
+        $oldOrder = $chapter->order;
+
+        // Reorder affected chapters if order has changed
+        if ($newOrder !== $oldOrder) {
+            if ($newOrder < $oldOrder) {
+                // Moving chapter up: increment order of chapters in between
+                $this->book->chapters()
+                    ->where('order', '>=', $newOrder)
+                    ->where('order', '<', $oldOrder)
+                    ->increment('order');
+            } else {
+                // Moving chapter down: decrement order of chapters in between
+                $this->book->chapters()
+                    ->where('order', '>', $oldOrder)
+                    ->where('order', '<=', $newOrder)
+                    ->decrement('order');
+            }
+        }
+
         $chapter->update([
-            'title' => $validated['editingChapter']['title'],
-            'description' => $validated['editingChapter']['description'],
-            'order' => $validated['editingChapter']['order'],
+            'title' => $this->editingChapter['title'],
+            'description' => $this->editingChapter['description'],
+            'order' => $newOrder,
         ]);
 
-        session()->flash('message', 'Bab berhasil diperbarui');
-        $this->dispatch('close-modal');
-    }
-    public function addDiscussion($chapterId)
-    {
-        $this->selectedChapterId = $chapterId;
-        $this->newDiscussion = [
-            'title' => '',
-            'content' => '',
-        ];
-        
-        $this->dispatch('add-discussion-modal');
-    }
-
-   public function storeDiscussion()
-    {
-        // Tambahkan validasi di sini
-        $validated = $this->validate([
-            'newDiscussion.title' => 'required|string|max:255',
-            'newDiscussion.content' => 'required|string',
-        ]);
-        
-        $chapter = Chapter::find($this->selectedChapterId);
-        
-        $chapter->discussions()->create([
-            'title' => $validated['newDiscussion']['title'], // Gunakan nilai yang divalidasi
-            'content' => $validated['newDiscussion']['content'],
-        ]);
-
-        session()->flash('message', 'Pembahasan berhasil ditambahkan');
+        $this->resetEditingChapter();
         $this->dispatch('close-modal');
     }
 
-    public function getChapters()
+    #[On('chapter-deleted')]
+    public function updateOrder(): void
     {
-        return Chapter::where('book_id', $this->book->id)
-            ->with(['discussions'])
-            ->orderBy('order')
-            ->get();
+        $this->chapters->each(function ($chapter, $index) {
+            $chapter->update(['order' => $index + 1]);
+        });
     }
 
+    public function confirmDeleteChapter($chapterId)
+    {
+        $this->editingChapterId = $chapterId;
+        $this->dispatch('delete-chapter-modal');
+    }
+
+    public function deleteChapter()
+    {
+        $chapter = $this->book->chapters()->findOrFail($this->editingChapterId);
+        $deletedOrder = $chapter->order;
+
+        // Delete chapter and its discussions
+        $chapter->discussions()->delete();
+        $chapter->delete();
+
+        // Reorder remaining chapters
+        $this->book->chapters()
+            ->where('order', '>', $deletedOrder)
+            ->decrement('order');
+
+        $this->dispatch('close-modal');
+    }
+
+    public function storeChapter()
+    {
+        $this->validate([
+            'newChapter.title' => 'required|string|min:3',
+            'newChapter.description' => 'nullable|string',
+            'newChapter.order' => 'nullable|integer|min:1',
+            'orderPosition' => 'required|in:start,end,custom',
+        ]);
+
+        $lastOrder = $this->book->chapters()->max('order') ?? 0;
+        
+        $order = match($this->orderPosition) {
+            'start' => 1,
+            'end' => $lastOrder + 1,
+            'custom' => $this->newChapter['order'] ?? $lastOrder + 1,
+            default => $lastOrder + 1,
+        };
+
+        // If inserting at start or custom position, shift existing chapters
+        if ($this->orderPosition === 'start' || ($this->orderPosition === 'custom' && $order <= $lastOrder)) {
+            $this->book->chapters()
+                ->where('order', '>=', $order)
+                ->increment('order');
+        }
+
+        $this->book->chapters()->create([
+            'title' => $this->newChapter['title'],
+            'description' => $this->newChapter['description'],
+            'order' => $order,
+        ]);
+
+        $this->resetNewChapter();
+        $this->dispatch('close-modal');
+    }
+
+    public function storeDiscussion()
+    {
+        $this->validate([
+            'selectedChapterId' => 'required|exists:chapters,id',
+            'newDiscussion.title' => 'required|string|min:3',
+            'newDiscussion.content' => 'required|string|min:10',
+        ]);
+
+        Chapter::find($this->selectedChapterId)->discussions()->create([
+            'title' => $this->newDiscussion['title'],
+            'content' => $this->newDiscussion['content'],
+        ]);
+
+        $this->resetNewDiscussion();
+        $this->dispatch('close-modal');
+    }
+
+    public function resetNewChapter()
+    {
+        $this->reset('newChapter', 'orderPosition');
+    }
+
+    public function resetNewDiscussion()
+    {
+        $this->reset('newDiscussion', 'selectedChapterId');
+    }
+
+    public function resetEditingChapter()
+    {
+        $this->reset('editingChapter', 'editingChapterId');
+    }
+
+    #[On('chapter-deleted')]
     public function render()
     {
-        return view('livewire.books.chapter-index', [
-            'chapters' => $this->getChapters()
-        ]);
+        return view('livewire.books.chapter-index');
     }
 }
