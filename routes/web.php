@@ -15,22 +15,24 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// User's Own Content Routes
 Route::middleware(['auth'])->group(function () {
-    // Books Management - User's own books
-    Route::get('/books', [BookController::class, 'index'])->name('books.index');
-    Route::get('/books/{id}', [BookController::class, 'show'])->name('books.show');
-    Route::get('/books/{bookId}/chapters/{chapterId}/discussions', [BookController::class, 'discussions'])->name('books.discussions');
-    
+    Route::prefix('books')->name('books.')
+        ->controller(BookController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::get('/{bookId}/chapters/{chapterId}/discussions', 'discussions')->name('discussions');
+    });
+
     // Masail Management - User's own masail
-    Route::get('/masail', function () {
-        return view('masail.index');
-    })->name('masail.index');
-    
+    Route::view('/masail', 'masail.index')->name('masail.index');
+
     // Library - Browse other users' content
-    Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
-    Route::get('/library/books/{id}', [LibraryController::class, 'showBook'])->name('library.books.show');
-    Route::get('/library/masail/{id}', [LibraryController::class, 'showMasail'])->name('library.masail.show');
+    Route::prefix('library')->name('library.')->group(function () {
+        Route::get('/', [LibraryController::class, 'index'])->name('index');
+        Route::get('/books/{id}', [LibraryController::class, 'showBook'])->name('books.show');
+        Route::get('/masail/{id}', [LibraryController::class, 'showMasail'])->name('masail.show');
+    });
 });
 
 // Exam Routes

@@ -12,9 +12,9 @@ class BookController extends Controller
     {
         // Show only current user's books
         $books = Book::where('user_id', auth()->id())
-                    ->with('allChapters')
-                    ->latest()
-                    ->paginate(12);
+            ->with('allChapters')
+            ->latest()
+            ->paginate(12);
 
         return view('books.index', compact('books'));
     }
@@ -23,9 +23,9 @@ class BookController extends Controller
     {
         // Show only current user's book
         $book = Book::where('user_id', auth()->id())
-                   ->where('id', $id)
-                   ->with(['chapters.discussions'])
-                   ->firstOrFail();
+            ->where('id', $id)
+            ->with(['chapters.discussions'])
+            ->firstOrFail();
 
         return view('books.show', compact('book'));
     }
