@@ -58,7 +58,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('library.index') }}"
+                {{-- <a href="{{ route('library.index') }}"
                     class="bg-indigo-50 border border-indigo-200 rounded-lg p-6 hover:bg-indigo-100 transition-colors">
                     <div class="flex items-center">
                         <div class="p-2 bg-indigo-500 rounded-lg">
@@ -72,7 +72,7 @@
                             <p class="text-gray-600">Jelajahi kitab dan masail dari pengguna lain</p>
                         </div>
                     </div>
-                </a>
+                </a> --}}
             </div>
 
             <!-- Recent Activity -->
