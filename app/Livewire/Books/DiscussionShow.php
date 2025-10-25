@@ -9,9 +9,9 @@ class DiscussionShow extends Component
 {
     public Discussion $discussion;
     
-    public function mount($discussionId)
+    public function mount($discussion)
     {
-        $this->discussion = Discussion::with('chapter.book')->findOrFail($discussionId);
+        $this->discussion = $discussion;
     }
 
     public function render()

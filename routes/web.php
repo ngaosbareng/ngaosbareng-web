@@ -15,16 +15,20 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-    Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])
+    ->group(function () {
+    
     // Books Routes
     Route::prefix('books')->name('books.')
         ->controller(BookController::class)
         ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/{book}/chapters', 'chapters')->name('chapters');
-        Route::get('/chapters/{chapter}/discussions', 'discussions')->name('discussions');
-        Route::get('/discussions/{discussion}', 'showDiscussion')->name('discussions.show');
-    });    // Masail Management - User's own masail
+            Route::get('/', 'index')->name('index');
+            Route::get('/{book}/chapters', 'chapters')->name('chapters');
+            Route::get('/chapters/{chapter}/discussions', 'discussions')->name('discussions');
+            Route::get('/discussions/{discussion}', 'showDiscussion')->name('discussions.show');
+    });
+    
+    // Masail Management - User's own masail
     Route::view('/masail', 'masail.index')->name('masail.index');
 
     // Library - Browse other users' content
