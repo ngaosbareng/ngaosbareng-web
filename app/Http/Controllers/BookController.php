@@ -13,6 +13,38 @@ class BookController extends Controller
         return view('books.index');
     }
 
+    public function updateChapter(Request $request, Chapter $chapter)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'level' => 'required|integer|min:0|max:5',
+        ]);
+
+        $chapter->update($validated);
+
+        return back()->with('message', 'Bab berhasil diperbarui');
+    }
+
+    public function storeDiscussion(Request $request, Chapter $chapter)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+
+        $discussion = $chapter->discussions()->create($validated);
+
+        return back()->with('message', 'Pembahasan berhasil ditambahkan');
+    }
+
+    public function destroyDiscussion(Discussion $discussion)
+    {
+        $discussion->delete();
+        
+        return back()->with('message', 'Pembahasan berhasil dihapus');
+    }
+
     public function chapters(Book $book)
     {
         return view('books.chapters', [
