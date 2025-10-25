@@ -19,18 +19,11 @@ Route::middleware(['auth'])
     ->group(function () {
     
     // Books Routes
-        Route::prefix('books')->name('books.')->group(function () {
+    Route::prefix('books')->name('books.')->group(function () {
         Route::get('/', [BookController::class, 'index'])->name('index');
         Route::get('/{book}/chapters', [BookController::class, 'chapters'])->name('chapters');
         Route::get('/chapters/{chapter}/discussions', [BookController::class, 'discussions'])->name('discussions');
         Route::get('/discussions/{discussion}', [BookController::class, 'showDiscussion'])->name('discussions.show');
-        
-        // Chapter management
-        Route::put('/chapters/{chapter}', [BookController::class, 'updateChapter'])->name('chapters.update');
-        
-        // Discussion management
-        Route::post('/chapters/{chapter}/discussions', [BookController::class, 'storeDiscussion'])->name('discussions.store');
-        Route::delete('/discussions/{discussion}', [BookController::class, 'destroyDiscussion'])->name('discussions.destroy');
     });
     
     // Masail Management - User's own masail
