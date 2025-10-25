@@ -127,7 +127,7 @@
                                     </svg>
                                     <span class="hidden md:inline">Hapus</span>
                                 </button>
-                                <a href="{{ route('books.show', $book->id) }}"
+                                <a href="{{ route('books.chapters', $book->id) }}"
                                    class="inline-flex items-center px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-400"
                                    title="Kelola Bab">
                                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

@@ -4,44 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Chapter;
+use App\Models\Discussion;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
     public function index()
     {
-        // Show only current user's books
-        $books = Book::where('user_id', auth()->id())
-            ->with('allChapters')
-            ->latest()
-            ->paginate(12);
-
-        return view('books.index', compact('books'));
+        return view('books.index');
     }
 
-    public function show($id)
+    public function chapters(Book $book)
     {
-        // Show only current user's book
-        $book = Book::where('user_id', auth()->id())
-            ->where('id', $id)
-            ->with(['chapters.discussions'])
-            ->firstOrFail();
-
-        return view('books.show', compact('book'));
+        return view('books.chapters', [
+            'book' => $book
+        ]);
     }
 
-    public function discussions($bookId, $chapterId)
+    public function discussions(Chapter $chapter)
     {
-        // Ensure user owns the book
-        $book = Book::where('user_id', auth()->id())
-                   ->where('id', $bookId)
-                   ->firstOrFail();
+        $chapter->load('book');
+        
+        return view('books.discussions', [
+            'chapter' => $chapter
+        ]);
+    }
 
-        $chapter = Chapter::where('book_id', $bookId)
-                         ->where('id', $chapterId)
-                         ->with(['discussions', 'book'])
-                         ->firstOrFail();
-
-        return view('books.discussions', compact('book', 'chapter'));
+    public function showDiscussion(Discussion $discussion)
+    {
+        $discussion->load('chapter.book');
+        
+        return view('books.discussion-show', [
+            'discussion' => $discussion
+        ]);
     }
 }
